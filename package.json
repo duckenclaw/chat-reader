@@ -13,6 +13,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "categorize": "ts-node src/categorize.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
