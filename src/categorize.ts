@@ -28,8 +28,8 @@ const chatRules: CategoryRule[] = [
 
 // Message content category rules
 const messageRules: CategoryRule[] = [
-  { category: 'Transport, Cars', keywords: ['машина', 'машину', 'автомобиль'] },
-  { category: 'Transport, Bikes', keywords: ['байк', 'мотоцикл', 'мотик', 'мопед'] },
+  { category: 'Cars', keywords: ['машина', 'машину', 'автомобиль'] },
+  { category: 'Bikes', keywords: ['байк', 'мотоцикл', 'мотик', 'мопед'] },
   { category: 'Transport', keywords: ['машина', 'машину', 'автомобиль', 'байк', 'мотоцикл', 'мотик', 'мопед'] },
   { category: 'Education, English', keywords: ['английского', 'английский', 'англ'] },
   { category: 'Education', keywords: ['обучение', 'обучаем', 'расскажем', 'покажем'] },
