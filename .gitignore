@@ -3,4 +3,3 @@ node_modules
 .DS_Store
 src/messages.json
 src/chats.txt
-

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "dotenv": "^16.5.0",
+    "fs": "^0.0.1-security",
     "telegraf": "^4.16.3",
     "telegram": "^2.26.22",
     "telegram-mtproto": "^1.0.5",
@@ -12,12 +13,16 @@
   "description": "A script to read Telegram chat history and save messages to JSON",
   "main": "dist/index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node src/readChatMessages.ts",
     "categorize": "ts-node src/categorize.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["telegram", "chat", "history"],
+  "keywords": [
+    "telegram",
+    "chat",
+    "history"
+  ],
   "author": "",
   "license": "ISC"
 }

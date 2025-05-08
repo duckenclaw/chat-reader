@@ -109,8 +109,6 @@ async function main() {
       
       if (result && result.length > 0) {
         console.log(`Retrieved ${result.length} messages from @${chat}`);
-
-        console.log(result)
         
         // Process messages
         for (const msg of result) {
