@@ -1,0 +1,105 @@
+{
+    "locationCategories": [
+      "Thailand",
+      "Thailand, Phangan",
+      "Thailand, Phuket",
+      "Thailand, Pattaya",
+      "Thailand, Bangkok",
+      "Thailand, Chiangmai",
+      "Thailand, Samui"
+    ],
+    "chatRules": [
+      {
+        "name": "Thailand, Phangan",
+        "category": "Thailand, Phangan",
+        "keywords": ["phangan", "phng", "pangan"]
+      },
+      {
+        "name": "Thailand, Phuket",
+        "category": "Thailand, Phuket",
+        "keywords": ["phuket"]
+      },
+      {
+        "name": "Thailand, Pattaya",
+        "category": "Thailand, Pattaya",
+        "keywords": ["pattaya"]
+      },
+      {
+        "name": "Thailand, Bangkok",
+        "category": "Thailand, Bangkok",
+        "keywords": ["bkk", "bangkok"]
+      },
+      {
+        "name": "Thailand, Chiangmai",
+        "category": "Thailand, Chiangmai",
+        "keywords": ["cnx", "chiangmai"]
+      },
+      {
+        "name": "Thailand, Samui",
+        "category": "Thailand, Samui",
+        "keywords": ["samui"]
+      }
+    ],
+    "messageRules": [
+      {
+        "name": "Cars",
+        "category": "Cars",
+        "keywords": ["машина", "машину", "автомобиль"]
+      },
+      {
+        "name": "Bikes",
+        "category": "Bikes",
+        "keywords": ["байк", "мотоцикл", "мотик", "мопед"]
+      },
+      {
+        "name": "Transport",
+        "category": "Transport",
+        "keywords": ["машина", "машину", "автомобиль", "байк", "мотоцикл", "мотик", "мопед"]
+      },
+      {
+        "name": "Education, English",
+        "category": "Education, English",
+        "keywords": ["английского", "английский", "англ"]
+      },
+      {
+        "name": "Education",
+        "category": "Education",
+        "keywords": ["обучение", "обучаем", "расскажем", "покажем"]
+      },
+      {
+        "name": "Event",
+        "category": "Event",
+        "keywords": ["туса", "мероприятие", "конференция", "тусовка", "вечеринка", "DJ", "концерт", "клуб"]
+      },
+      {
+        "name": "Sell",
+        "category": "Sell",
+        "keywords": ["продам", "продаю"]
+      },
+      {
+        "name": "Cosmetology",
+        "category": "Cosmetology",
+        "keywords": ["красоты", "красота", "косметология", "косметолог", "косметолога", "массаж", "уход", "маникюр", "педикюр", "маник", "ноготочки"]
+      },
+      {
+        "name": "Housing",
+        "category": "Housing",
+        "keywords": ["отель", "отеле", "вилла", "виллу", "хостел", "хостеле", "дом", "апартаменты", "квартира", "жилье"]
+      },
+      {
+        "name": "Smoking",
+        "category": "Smoking",
+        "keywords": ["cannabis", "каннабис", "кальян", "табак", "табакам", "трава", "стрейны", "стрейнов", "стрейна", "снюс", "жевательный"]
+      },
+      {
+        "name": "Rent",
+        "category": "Rent",
+        "keywords": ["сдам", "аренда", "арендную", "арендую"]
+      },
+      {
+        "name": "Job",
+        "category": "Job",
+        "keywords": ["работу", "работу", "заработок", "зарабатывать", "прайс", "плата"]
+      }
+    ]
+  }

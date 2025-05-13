@@ -1,8 +1,10 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { Engine, Rule } from 'json-rules-engine';
 
-// Path to messages.json file
+// Path to messages.json file and rules configuration file
 const messagesFilePath = join(__dirname, 'messages.json');
+const rulesFilePath = join(__dirname, 'rules-config.json');
 
 // Configuration options
 const config = {
@@ -10,54 +12,43 @@ const config = {
   deleteLocationOnlyRecords: false
 };
 
-// Category rules
-interface CategoryRule {
+// Interface for message objects
+interface Message {
+  username: string;
+  message: string;
+  timestamp: number;
+  source_chat: string;
+  category: string;
+}
+
+// Interface for rule configuration
+interface RuleConfig {
+  name: string;
   category: string;
   keywords: string[];
 }
 
-// Chat name category rules
-const chatRules: CategoryRule[] = [
-  { category: 'Thailand, Phangan', keywords: ['phangan', 'phng', 'pangan'] },
-  { category: 'Thailand, Phuket', keywords: ['phuket'] },
-  { category: 'Thailand, Pattaya', keywords: ['pattaya'] },
-  { category: 'Thailand, Bangkok', keywords: ['bkk', 'bangkok'] },
-  { category: 'Thailand, Chiangmai', keywords: ['cnx', 'chiangmai'] },
-  { category: 'Thailand, Samui', keywords: ['samui'] }
-];
-
-// Message content category rules
-const messageRules: CategoryRule[] = [
-  { category: 'Cars', keywords: ['машина', 'машину', 'автомобиль'] },
-  { category: 'Bikes', keywords: ['байк', 'мотоцикл', 'мотик', 'мопед'] },
-  { category: 'Transport', keywords: ['машина', 'машину', 'автомобиль', 'байк', 'мотоцикл', 'мотик', 'мопед'] },
-  { category: 'Education, English', keywords: ['английского', 'английский', 'англ'] },
-  { category: 'Education', keywords: ['обучение', 'обучаем', 'расскажем', 'покажем'] },
-  { category: 'Event', keywords: ['туса', 'мероприятие', 'конференция', 'тусовка', 'вечеринка', 'DJ', 'концерт', 'клуб'] },
-  { category: 'Sell', keywords: ['продам', 'продаю'] },
-  { category: 'Cosmetology', keywords: ['красоты', 'красота', 'косметология', 'косметолог', 'косметолога', 'массаж', 'уход', 'маникюр', 'педикюр', 'маник', 'ноготочки'] },
-  { category: 'Housing', keywords: ['отель', 'отеле', 'вилла', 'виллу', 'хостел', 'хостеле', 'дом', 'апартаменты', 'квартира', 'жилье'] },
-  { category: 'Smoking', keywords: ['cannabis', 'каннабис', 'кальян', 'табак', 'табакам', 'трава', 'стрейны', 'стрейнов', 'стрейна', 'снюс', 'жевательный'] },
-  { category: 'Rent', keywords: ['сдам', 'аренда', 'арендную', 'арендую'] },
-  { category: 'Job', keywords: ['работу', 'работу', 'заработок', 'зарабатывать', 'прайс', 'плата'] }
-];
-
-// Location categories for filtering
-const locationCategories = [
-  'Thailand',
-  'Thailand, Phangan',
-  'Thailand, Phuket',
-  'Thailand, Pattaya',
-  'Thailand, Bangkok',
-  'Thailand, Chiangmai',
-  'Thailand, Samui'
-];
-
-// Helper function to check if a string contains any of the keywords
-function containsKeyword(text: string, keywords: string[]): boolean {
-  const lowerCaseText = text.toLowerCase();
-  return keywords.some(keyword => lowerCaseText.includes(keyword.toLowerCase()));
+// Interface for rules JSON file structure
+interface RulesData {
+  locationCategories: string[];
+  chatRules: RuleConfig[];
+  messageRules: RuleConfig[];
 }
+
+// Load rules configuration from file
+function loadRulesConfig(): RulesData {
+  try {
+    const rulesData = readFileSync(rulesFilePath, 'utf-8');
+    return JSON.parse(rulesData);
+  } catch (error) {
+    console.error('Error loading rules configuration:', error);
+    process.exit(1);
+  }
+}
+
+// Rules data
+const rulesData = loadRulesConfig();
+const locationCategories = rulesData.locationCategories;
 
 // Helper function to check if a category array only contains location categories
 function hasOnlyLocationCategories(categoryArray: string[]): boolean {
@@ -75,47 +66,103 @@ function processArgs() {
   }
 }
 
+// Create rules engine with custom operator
+function createRulesEngine() {
+  const engine = new Engine();
+  
+  // Custom substring matcher for better text matching
+  engine.addOperator('includesText', (factValue: string, keyword: string) => {
+    return typeof factValue === 'string' && factValue.toLowerCase().includes(keyword.toLowerCase());
+  });
+  
+  // Add chat rules
+  rulesData.chatRules.forEach(rule => {
+    const conditions = {
+      any: rule.keywords.map(keyword => ({
+        fact: 'source_chat',
+        operator: 'includesText',
+        value: keyword
+      }))
+    };
+    
+    engine.addRule(new Rule({
+      name: rule.name,
+      conditions,
+      event: { type: 'category', params: { category: rule.category } }
+    }));
+  });
+  
+  // Add message rules
+  rulesData.messageRules.forEach(rule => {
+    const conditions = {
+      any: rule.keywords.map(keyword => ({
+        fact: 'message',
+        operator: 'includesText',
+        value: keyword
+      }))
+    };
+    
+    engine.addRule(new Rule({
+      name: rule.name,
+      conditions,
+      event: { type: 'category', params: { category: rule.category } }
+    }));
+  });
+
+  return engine;
+}
+
 // Main categorization function
-function categorizeMessages() {
+async function categorizeMessages() {
   try {
     // Process command line arguments
     processArgs();
     
     // Read messages.json
+    console.log(`Reading messages from ${messagesFilePath}...`);
     const messagesData = readFileSync(messagesFilePath, 'utf-8');
-    const messages = JSON.parse(messagesData);
+    const messages: Message[] = JSON.parse(messagesData);
+    console.log(`Loaded ${messages.length} messages.`);
+    
+    // Create rules engine with custom operator
+    console.log(`Loading rules from ${rulesFilePath}...`);
+    const engine = createRulesEngine();
+    console.log(`Loaded ${rulesData.chatRules.length} chat rules and ${rulesData.messageRules.length} message content rules.`);
     
     let categorizedCount = 0;
     let deletedCount = 0;
-    const filteredMessages = [];
-
+    const filteredMessages: Message[] = [];
+    
     // Process each message
+    console.log('Processing messages...');
     for (const message of messages) {
-      const categories: string[] = [];
+      // Prepare facts for rules engine - lowercase everything for consistent matching
+      const facts = {
+        source_chat: (message.source_chat || '').toLowerCase(),
+        message: (message.message || '').toLowerCase()
+      };
       
-      // Check chat name against chat rules
-      chatRules.forEach(rule => {
-        if (containsKeyword(message.source_chat, rule.keywords)) {
-          categories.push(rule.category);
+      // Run rules engine
+      const results = await engine.run(facts);
+      
+      // Extract categories from results
+      const categories: string[] = [];
+      results.events.forEach(event => {
+        if (event.type === 'category') {
+          categories.push(event.params?.category);
         }
       });
       
-      // Check message content against message rules
-      if (message.message) {
-        messageRules.forEach(rule => {
-          if (containsKeyword(message.message, rule.keywords)) {
-            categories.push(rule.category);
-          }
-        });
-      }
+      // Remove duplicates from categories
+      const uniqueCategories = [...new Set(categories)];
       
       // Update message with categories (comma-separated)
-      if (categories.length > 0) {
-        message.category = categories.join(', ');
+      if (uniqueCategories.length > 0) {
+        message.category = uniqueCategories.join(', ');
         categorizedCount++;
         
         // Check if we should delete this record based on categories
-        if (config.deleteLocationOnlyRecords && hasOnlyLocationCategories(categories)) {
+        if (config.deleteLocationOnlyRecords && hasOnlyLocationCategories(uniqueCategories)) {
           deletedCount++;
           // Skip adding to filteredMessages to effectively delete it
         } else {
@@ -123,6 +170,7 @@ function categorizeMessages() {
         }
       } else {
         // No categories found, keep the message as is
+        message.category = '';
         filteredMessages.push(message);
       }
     }
@@ -134,8 +182,8 @@ function categorizeMessages() {
     console.log(`Categorization complete. Added categories to ${categorizedCount} messages.`);
     if (config.deleteLocationOnlyRecords) {
       console.log(`Deleted ${deletedCount} messages that only had location categories.`);
-      console.log(`${messagesToWrite.length} messages remaining in the file.`);
     }
+    console.log(`${messagesToWrite.length} messages remaining in the file.`);
     
   } catch (error) {
     console.error('Error categorizing messages:', error);
@@ -143,4 +191,4 @@ function categorizeMessages() {
 }
 
 // Run the categorization
-categorizeMessages(); 
+categorizeMessages();

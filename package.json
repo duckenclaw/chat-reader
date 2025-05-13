@@ -2,6 +2,7 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "fs": "^0.0.1-security",
+    "json-rules-engine": "^7.3.1",
     "telegraf": "^4.16.3",
     "telegram": "^2.26.22",
     "telegram-mtproto": "^1.0.5",
@@ -10,11 +11,14 @@
   },
   "name": "chat-reader",
   "version": "1.0.0",
-  "description": "A script to read Telegram chat history and save messages to JSON",
+  "description": "A couple of scripts that use a telegram client",
   "main": "dist/index.js",
   "scripts": {
-    "start": "ts-node src/readChatMessages.ts",
+    "read-chat-messages": "ts-node src/readChatMessages.ts",
+    "extract-chats": "ts-node src/exctractChats.ts",
+    "leave-chats": "ts-node src/leaveAllChats.ts",
     "categorize": "ts-node src/categorize.ts",
+    "join-chats": "ts-node src/joinChats.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
